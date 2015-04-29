@@ -19,9 +19,38 @@ body {
 
 </style>
 <body>
+
+
+<h1> Change in gut community composition over time.</h1>
+
+<nav>
+<h2 id="demo">phylum</h2>
+
+<select id="phylLevelSelect" onchange="changephylo()">
+	<option value="phylum" selected="selected">Phylum</option>
+	<option value="class">Class</option>
+	<option value="order">Order</option>
+	<option value="family">Family</option>
+	<option value="genus">Genus</option>
+	<option value="species">Species</option>
+</select>
+</nav>
+
+
+
+
+
+
 <script src="http://d3js.org/d3.v3.js"></script>
 <script>
 
+// can switch this variable to be numeric if it would be easier
+var phyloLevel = "phylum";
+
+function changephylo() {
+	phyloLevel = document.getElementById("phylLevelSelect").value;
+	document.getElementById("demo").innerHTML = phyloLevel;
+}
 
 var margin = {top: 20, right: 20, bottom: 30, left: 50},
     width = 1100 - margin.left - margin.right,
@@ -114,3 +143,5 @@ d3.tsv("DonorA_phylum_relAbund.txt", function(error, data) {
 });
 
 </script>
+
+</body>
