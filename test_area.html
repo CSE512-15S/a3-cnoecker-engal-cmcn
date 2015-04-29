@@ -37,11 +37,18 @@ body {
 </nav>
 
 
+<nav>
 
+<select id="subjectSelect" onchange="changeData()">
+  <option value="DonorA" selected="selected">Donor A</option>
+  <option value="DonorB">Donor B</option>
+</select>
+</nav>
 
 
 
 <script src="http://d3js.org/d3.v3.js"></script>
+
 <script>
 
 // can switch this variable to be numeric if it would be easier
@@ -50,6 +57,19 @@ var phyloLevel = "phylum";
 function changephylo() {
 	phyloLevel = document.getElementById("phylLevelSelect").value;
 	document.getElementById("demo").innerHTML = phyloLevel;
+}
+
+
+var dataID = "DonorA";
+
+function changeData() {
+  subject = document.getElementById("subjectSelect").value;
+  dataID = subject;
+  console.log(dataID);
+  svg.selectAll(".browser").remove();
+  svg.selectAll(".axis").remove();
+  drawPlot();
+  //need to get it to re-run the plot drawing
 }
 
 var margin = {top: 20, right: 20, bottom: 30, left: 50},
@@ -70,8 +90,8 @@ var xAxis = d3.svg.axis()
 
 var yAxis = d3.svg.axis()
     .scale(y)
-    .orient("left");
-//    .tickFormat(d3.format(".0%"));
+    .orient("left")
+    .tickFormat(d3.format(".0%"));
 
 var area = d3.svg.area()
     .x(function(d) { return x(d.TimePoint); })
@@ -90,57 +110,62 @@ var svg = d3.select("body").append("svg")
 
 
 
-d3.tsv("DonorA_phylum_relAbund.txt", function(error, data) {
-  color.domain(d3.keys(data[0]).filter(function(key) { 
+var drawPlot = function() {
+  d3.tsv(dataID.concat("_phylum_relAbund.txt"), function(error, data) {
+    color.domain(d3.keys(data[0]).filter(function(key) { 
     //data[key] = +data[key];
-    return key !== "TimePoint"; }));
+      return key !== "TimePoint"; }));
 
 //  data.forEach(function(d) {
 //    d.date = parseDate(d.date);
 //  });
 
-  var browsers = stack(color.domain().map(function(name) {
-    return {
-      name: name,
-      values: data.map(function(d) {
-        return {TimePoint: +d.TimePoint, y: d[name]*100};
-      })
-    };
-  }));
+    var browsers = stack(color.domain().map(function(name) {
+      return {
+        name: name,
+        values: data.map(function(d) {
+          return {TimePoint: +d.TimePoint, y: d[name]*1};
+        })
+      };
+    }));
 
-  x.domain(d3.extent(data, function(d) { return +d.TimePoint; }));
-  y.domain([0,100])
+    x.domain(d3.extent(data, function(d) { return +d.TimePoint; }));
+    y.domain([0,1])
   //y.domain(d3.extent(data, function(d) { return +d.Firmicutes; })); //, function(d) { return +d.; }));
 
-  var browser = svg.selectAll(".browser")
-      .data(browsers)
-      .enter().append("g")
-      .attr("class", "browser");
+    var browser = svg.selectAll(".browser")
+        .data(browsers)
+        .enter().append("g")
+        .attr("class", "browser");
 
-  browser.append("path")
-      .attr("class", "area")
-      .attr("d", function(d) {
-        return area(d.values); })
-      .style("fill", function(d) {
-        return color(d.name); });
+    browser.append("path")
+        .attr("class", "area")
+        .attr("d", function(d) {
+          return area(d.values); })
+        .style("fill", function(d) {
+          return color(d.name); });
 
- browser.append("text")
-      .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
-      .attr("transform", function(d) { return "translate(" + x(d.value.TimePoint) + "," + y(d.value.y0 + d.value.y / 2) + ")"; })
-      .attr("x", -6)
-      .attr("dy", ".35em")
-      .text(function(d) { return d.name; });
+   browser.append("text")
+        .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; }) //second to last value
+        .attr("transform", function(d) { return "translate(" + x(d.value.TimePoint) + "," + y(d.value.y0 + d.value.y / 2) + ")"; })
+        .attr("x", -6)
+        .attr("dy", ".35em")
+        .text(function(d) { return d.name; });
 
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
 
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis);
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
 
-});
+  });
+
+}
+
+drawPlot();
 
 </script>
 
