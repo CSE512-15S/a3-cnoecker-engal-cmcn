@@ -34,15 +34,21 @@ body {
 	<option value="genus">Genus</option>
 	<option value="species">Species</option>
 </select>
-</nav>
 
-
-<nav>
 
 <select id="subjectSelect" onchange="changeData()">
   <option value="DonorA" selected="selected">Donor A</option>
   <option value="DonorB">Donor B</option>
 </select>
+
+<br/>
+
+<input id="lowT" type="text" onchange="updateTime()" value="0"/>
+<input id="highT" type="text" onchange="updateTime()" value="100"/>
+
+<br/>
+
+<h2 id="testL">0</h2>
 </nav>
 
 
@@ -53,12 +59,21 @@ body {
 
 // can switch this variable to be numeric if it would be easier
 var phyloLevel = "phylum";
+var lowTime = 0;
+var highTime = 100;
 
 function changephylo() {
 	phyloLevel = document.getElementById("phylLevelSelect").value;
 	document.getElementById("demo").innerHTML = phyloLevel;
 }
 
+function updateTime() {
+	lowTime = document.getElementById("lowT").value;
+	highTime = document.getElementById("highT").value;
+	document.getElementById("testL").innerHTML = lowTime;
+		
+	drawPlot(); 	
+}
 
 var dataID = "DonorA";
 
@@ -130,7 +145,9 @@ var drawPlot = function() {
     }));
 
     x.domain(d3.extent(data, function(d) { return +d.TimePoint; }));
-    y.domain([0,1])
+	var dlims = d3.extent(data, function(d) { return +d.TimePoint; });
+	//x.domain([dlims[0] + lowTime * ((dlims[1]-dlims[0])/dlims[1]),  dlims[0] + highTime * ((dlims[1]-dlims[0])/dlims[1])]);
+    y.domain([0,1]);
   //y.domain(d3.extent(data, function(d) { return +d.Firmicutes; })); //, function(d) { return +d.; }));
 
     var browser = svg.selectAll(".browser")
