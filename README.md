@@ -22,10 +22,10 @@ If you put your work online, please also write a [one-line description and add a
 
 ## Story Board
 
-![story1](storyboard1.pdf)
-![story2](storyboard2.pdf)
-![story3](storyboard3.pdf)
-![story4](storyboard4.pdf)
+![story1](storyboard1.png)
+![story2](storyboard2.png)
+![story3](storyboard3.png)
+![story4](storyboard4.png)
 
 Put either your storyboard content or a [link to your storyboard pdf file](storyboard.pdf?raw=true) here. Just like A2, you can use any software to create a *reasonable* pdf storyboard.
 
