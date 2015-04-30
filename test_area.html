@@ -101,6 +101,14 @@ var area = d3.svg.area()
 var stack = d3.layout.stack()
     .values(function(d) { return d.values; });
 
+var tooltip = d3.select("body")
+    .append("div")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden")
+    .style("font-size", "medium")
+    .text("a simple tooltip");
+
 
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -136,7 +144,14 @@ var drawPlot = function() {
     var browser = svg.selectAll(".browser")
         .data(browsers)
         .enter().append("g")
-        .attr("class", "browser");
+        .attr("class", "browser")
+        .on("mouseover", function(d){
+          current_data = d3.select(this).datum();
+          tooltip.text(current_data.name);
+          return tooltip.style("visibility", "visible");
+        })
+        .on("mousemove", function(){return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+        .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
 
     browser.append("path")
         .attr("class", "area")
