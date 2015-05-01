@@ -24,15 +24,17 @@ body {
 <h1> Change in gut community composition over time.</h1>
 
 <nav>
-<h2 id="demo">phylum</h2>
+<h2 id="demo">Phylum</h2>
 
+<!-- Added kingdom as an option since there is one Archaea, but leaving phylum as the default - Alex -->
 <select id="phylLevelSelect" onchange="changephylo()">
-	<option value="phylum" selected="selected">Phylum</option>
-	<option value="class">Class</option>
-	<option value="order">Order</option>
-	<option value="family">Family</option>
-	<option value="genus">Genus</option>
-	<option value="species">Species</option>
+	<option value="Phylum" selected="selected">Phylum</option>
+	<option value="Class">Class</option>
+	<option value="Order">Order</option>
+	<option value="Family">Family</option>
+	<option value="Genus">Genus</option>
+	<option value="Species">Species</option>
+  <option value="Kingdom">Kingdom</option>
 </select>
 
 
@@ -43,8 +45,8 @@ body {
 
 <br/>
 
-<input id="lowT" type="text" onchange="updateTime()" value="0"/>
-<input id="highT" type="text" onchange="updateTime()" value="100"/>
+<input id="lowT" type="text" onchange="updateTime()" value="-1"/>
+<input id="highT" type="text" onchange="updateTime()" value="500"/>
 
 <br/>
 
@@ -58,20 +60,28 @@ body {
 <script>
 
 // can switch this variable to be numeric if it would be easier
-var phyloLevel = "phylum";
-var lowTime = 0;
-var highTime = 100;
+var phyloLevel = "Phylum";
+var lowTime = -1;
+var highTime = 500;
+
 
 function changephylo() {
 	phyloLevel = document.getElementById("phylLevelSelect").value;
 	document.getElementById("demo").innerHTML = phyloLevel;
+
+  // Added redrawing when taxonomic level is switched
+  svg.selectAll(".browser").remove();
+  svg.selectAll(".axis").remove();
+  drawPlot();
 }
 
 function updateTime() {
 	lowTime = document.getElementById("lowT").value;
 	highTime = document.getElementById("highT").value;
 	document.getElementById("testL").innerHTML = lowTime;
-		
+	
+	svg.selectAll(".browser").remove();
+	svg.selectAll(".axis").remove();
 	drawPlot(); 	
 }
 
@@ -109,12 +119,20 @@ var yAxis = d3.svg.axis()
     .tickFormat(d3.format(".0%"));
 
 var area = d3.svg.area()
-    .x(function(d) { return x(d.TimePoint); })
+    .x(function(d) { return x(d.Timepoint); })
     .y0(function(d) { return y(d.y0); })
     .y1(function(d) { return y(d.y0 + d.y); });
 
 var stack = d3.layout.stack()
     .values(function(d) { return d.values; });
+
+var tooltip = d3.select("body")
+    .append("div")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden")
+    .style("font-size", "medium")
+    .text("a simple tooltip");
 
 
 var svg = d3.select("body").append("svg")
@@ -126,10 +144,12 @@ var svg = d3.select("body").append("svg")
 
 
 var drawPlot = function() {
-  d3.tsv(dataID.concat("_phylum_relAbund.txt"), function(error, data) {
+
+  // Changed file name to match the separate files properly
+  d3.tsv(dataID.concat("_").concat(phyloLevel).concat(".txt"), function(error, data) {
     color.domain(d3.keys(data[0]).filter(function(key) { 
     //data[key] = +data[key];
-      return key !== "TimePoint"; }));
+      return key !== "Timepoint"; }));
 
 //  data.forEach(function(d) {
 //    d.date = parseDate(d.date);
@@ -139,21 +159,40 @@ var drawPlot = function() {
       return {
         name: name,
         values: data.map(function(d) {
-          return {TimePoint: +d.TimePoint, y: d[name]*1};
+          return {Timepoint: +d.Timepoint, y: d[name]*1};
         })
       };
     }));
 
-    x.domain(d3.extent(data, function(d) { return +d.TimePoint; }));
+	
+    
 	var dlims = d3.extent(data, function(d) { return +d.TimePoint; });
-	//x.domain([dlims[0] + lowTime * ((dlims[1]-dlims[0])/dlims[1]),  dlims[0] + highTime * ((dlims[1]-dlims[0])/dlims[1])]);
-    y.domain([0,1]);
+	if (lowTime < dlims[0]) {
+		lowTime = dlims[0];
+		document.getElementById("lowT").innerHTML = lowTime;
+	}
+	if (highTime < dlims[1]) {
+		highTime = dlims[1];
+		document.getElementById("highT").value = highTime;
+	}
+
+    x.domain(d3.extent(data, function(d) { return +d.Timepoint; }));
+    //x.domain([lowTime, highTime])
+	//x.domain(dlims);
+	y.domain([0,1]);
   //y.domain(d3.extent(data, function(d) { return +d.Firmicutes; })); //, function(d) { return +d.; }));
 
     var browser = svg.selectAll(".browser")
         .data(browsers)
         .enter().append("g")
-        .attr("class", "browser");
+        .attr("class", "browser")
+        .on("mouseover", function(d){
+          current_data = d3.select(this).datum();
+          tooltip.text(current_data.name);
+          return tooltip.style("visibility", "visible");
+        })
+        .on("mousemove", function(){return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+        .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
 
     browser.append("path")
         .attr("class", "area")
@@ -164,7 +203,7 @@ var drawPlot = function() {
 
    browser.append("text")
         .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; }) //second to last value
-        .attr("transform", function(d) { return "translate(" + x(d.value.TimePoint) + "," + y(d.value.y0 + d.value.y / 2) + ")"; })
+        .attr("transform", function(d) { return "translate(" + x(d.value.Timepoint) + "," + y(d.value.y0 + d.value.y / 2) + ")"; })
         .attr("x", -6)
         .attr("dy", ".35em")
         .text(function(d) { return d.name; });
