@@ -177,16 +177,15 @@ var drawPlot = function() {
         .data(browsers)
         .enter().append("g")
         .attr("class", "browser")
-		.attr("clip-path","url(#area-area)")
-        .on("mouseover", function(d){
+		    .attr("clip-path","url(#area-area)")
+        .on("mouseover", function(){
+          return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+        .on("mousemove", function(d){
           var current_data = d3.select(this).datum(),
           x_pos = x.invert(d3.mouse(this)[0]),
           closest = bisectTimepoint(data, x_pos);
-          console.log(closest);
-          tooltip.html(current_data.name + "<br/>"  + "Day " + Math.round(x_pos) + "<br/> Relative abundance: " + Math.round(1000*current_data.values[closest].y)/10+"%");
-          return tooltip.style("visibility", "visible");
-        })
-        .on("mousemove", function(){return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+          tooltip.html(current_data.name + "<br/>"  + "Day " + current_data.values[closest].Timepoint + "<br/> Relative abundance: " + Math.round(1000*current_data.values[closest].y)/10+"%");
+          return tooltip.style("visibility", "visible").style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px"); })
         .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
 
 
