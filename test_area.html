@@ -36,15 +36,21 @@ body {
 	<option value="Genus">Genus</option>
 	<option value="Species">Species</option>
 </select>
-</nav>
 
-
-<nav>
 
 <select id="subjectSelect" onchange="changeData()">
   <option value="DonorA" selected="selected">Donor A</option>
   <option value="DonorB">Donor B</option>
 </select>
+
+<br/>
+
+<input id="lowT" type="text" onchange="updateTime()" value="0"/>
+<input id="highT" type="text" onchange="updateTime()" value="350"/>
+
+<br/>
+
+<h2 id="timeUpd">Update Time Scale</h2>
 </nav>
 
 
@@ -55,6 +61,9 @@ body {
 
 // can switch this variable to be numeric if it would be easier
 var phyloLevel = "Phylum";
+var lowTime = 0;
+var highTime = 350;
+
 
 function changephylo() {
 	phyloLevel = document.getElementById("phylLevelSelect").value;
@@ -65,6 +74,7 @@ function changephylo() {
   svg.selectAll(".axis").remove();
   drawPlot();
 }
+
 
 
 var dataID = "DonorA";
@@ -116,6 +126,9 @@ var tooltip = d3.select("body")
     .style("font-size", "medium")
     .style("padding","10px")
     .style("background-color","lightgrey");
+    .text("a simple tooltip");
+
+var browsers;
 
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -124,6 +137,15 @@ var svg = d3.select("body").append("svg")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 var bisectTimepoint = d3.bisector(function(d) { return d.Timepoint; }).left;
+
+svg.append("clipPath")
+	.attr("id", "area-area")
+	.append("rect")
+	.attr("x",0)
+	.attr("y",0)
+	.attr("width",width)
+	.attr("height",height);
+
 
 var drawPlot = function() {
 
@@ -147,13 +169,15 @@ var drawPlot = function() {
       };
     }));
 
+
     x.domain(d3.extent(data, function(d) { return +d.Timepoint; }));
-    y.domain([0,1])
+  	y.domain([0,1]);
 
     var browser = svg.selectAll(".browser")
         .data(browsers)
         .enter().append("g")
         .attr("class", "browser")
+		.attr("clip-path","url(#area-area)")
         .on("mouseover", function(d){
           var current_data = d3.select(this).datum(),
           x_pos = x.invert(d3.mouse(this)[0]),
@@ -193,6 +217,28 @@ var drawPlot = function() {
   });
 
 }
+
+d3.select("timeUpd")
+	.on("click", updateTime());
+	
+function updateTime() {
+	lowTime = document.getElementById("lowT").value;
+	highTime = document.getElementById("highT").value;
+	
+	x.domain([lowTime, highTime]);
+	
+	svg.select(".x.axis")
+		.transition()
+		.duration(1000)
+		.call(xAxis);
+		
+	svg.selectAll(".browser").selectAll("path")
+		.transition()
+		.duration(1000)
+		.attr("d", function(d) {
+          return area(d.values); });
+	
+}	
 
 drawPlot();
 
