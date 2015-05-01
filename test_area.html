@@ -45,12 +45,12 @@ body {
 
 <br/>
 
-<input id="lowT" type="text" onchange="updateTime()" value="-1"/>
-<input id="highT" type="text" onchange="updateTime()" value="500"/>
+<input id="lowT" type="text" onchange="updateTime()" value="0"/>
+<input id="highT" type="text" onchange="updateTime()" value="350"/>
 
 <br/>
 
-<h2 id="testL">0</h2>
+<h2 id="timeUpd">Update Time Scale</h2>
 </nav>
 
 
@@ -61,8 +61,8 @@ body {
 
 // can switch this variable to be numeric if it would be easier
 var phyloLevel = "Phylum";
-var lowTime = -1;
-var highTime = 500;
+var lowTime = 0;
+var highTime = 350;
 
 
 function changephylo() {
@@ -75,15 +75,7 @@ function changephylo() {
   drawPlot();
 }
 
-function updateTime() {
-	lowTime = document.getElementById("lowT").value;
-	highTime = document.getElementById("highT").value;
-	document.getElementById("testL").innerHTML = lowTime;
-	
-	svg.selectAll(".browser").remove();
-	svg.selectAll(".axis").remove();
-	drawPlot(); 	
-}
+
 
 var dataID = "DonorA";
 
@@ -134,6 +126,7 @@ var tooltip = d3.select("body")
     .style("font-size", "medium")
     .text("a simple tooltip");
 
+var browsers;
 
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -141,6 +134,13 @@ var svg = d3.select("body").append("svg")
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+svg.append("clipPath")
+	.attr("id", "area-area")
+	.append("rect")
+	.attr("x",0)
+	.attr("y",0)
+	.attr("width",width)
+	.attr("height",height);
 
 
 var drawPlot = function() {
@@ -155,7 +155,7 @@ var drawPlot = function() {
 //    d.date = parseDate(d.date);
 //  });
 
-    var browsers = stack(color.domain().map(function(name) {
+    browsers = stack(color.domain().map(function(name) {
       return {
         name: name,
         values: data.map(function(d) {
@@ -164,21 +164,8 @@ var drawPlot = function() {
       };
     }));
 
-	
-    
-	var dlims = d3.extent(data, function(d) { return +d.TimePoint; });
-	if (lowTime < dlims[0]) {
-		lowTime = dlims[0];
-		document.getElementById("lowT").innerHTML = lowTime;
-	}
-	if (highTime < dlims[1]) {
-		highTime = dlims[1];
-		document.getElementById("highT").value = highTime;
-	}
 
     x.domain(d3.extent(data, function(d) { return +d.Timepoint; }));
-    //x.domain([lowTime, highTime])
-	//x.domain(dlims);
 	y.domain([0,1]);
   //y.domain(d3.extent(data, function(d) { return +d.Firmicutes; })); //, function(d) { return +d.; }));
 
@@ -186,6 +173,7 @@ var drawPlot = function() {
         .data(browsers)
         .enter().append("g")
         .attr("class", "browser")
+		.attr("clip-path","url(#area-area)")
         .on("mouseover", function(d){
           current_data = d3.select(this).datum();
           tooltip.text(current_data.name);
@@ -220,6 +208,28 @@ var drawPlot = function() {
   });
 
 }
+
+d3.select("timeUpd")
+	.on("click", updateTime());
+	
+function updateTime() {
+	lowTime = document.getElementById("lowT").value;
+	highTime = document.getElementById("highT").value;
+	
+	x.domain([lowTime, highTime]);
+	
+	svg.select(".x.axis")
+		.transition()
+		.duration(1000)
+		.call(xAxis);
+		
+	svg.selectAll(".browser").selectAll("path")
+		.transition()
+		.duration(1000)
+		.attr("d", function(d) {
+          return area(d.values); });
+	
+}	
 
 drawPlot();
 
