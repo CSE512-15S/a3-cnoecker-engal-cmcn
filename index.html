@@ -76,8 +76,8 @@ function changephylo() {
 }
 
 
-
 var dataID = "DonorA";
+
 
 function changeData() {
   subject = document.getElementById("subjectSelect").value;
@@ -101,6 +101,7 @@ var color = {
   Genus: d3.scale.category20(),
   Species: d3.scale.category20(),
 };
+
 
 
 var x = d3.time.scale()
@@ -159,15 +160,12 @@ svg.append("clipPath")
 var drawPlot = function() {
 
   // Changed file name to match the separate files properly
-  d3.tsv(dataID.concat("_").concat(phyloLevel).concat(".txt"), function(error, data) {
+  d3.tsv(dataID.concat("_all_").concat(phyloLevel).concat(".txt"), function(error, data) {
     if(color[phyloLevel].domain().length===0){
       color[phyloLevel].domain(d3.keys(data[0]).filter(function(key) { 
         return key !== "Timepoint"; }));
-    }
+    } 
 
-    //  data.forEach(function(d) {
-    //    d.date = parseDate(d.date);
-    //  });
 
 	data.forEach(function(d) {
 		d.date = new Date(2011, 0, +d.Timepoint);
