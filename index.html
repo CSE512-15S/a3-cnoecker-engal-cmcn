@@ -119,11 +119,7 @@ var yAxis = d3.svg.axis()
     .orient("left")
     .tickFormat(d3.format(".0%"));
 
-<<<<<<< HEAD:test_area.html
 var bisectTimepoint = d3.bisector(function(d) { return d.date; }).left;
-=======
-var bisectTimepoint = d3.bisector(function(d) { return d.Timepoint; }).right;
->>>>>>> origin/master:index.html
 
 var area = d3.svg.area()
     .x(function(d) { return x(d.Timepoint); })
@@ -187,7 +183,7 @@ var drawPlot = function() {
       };
     }));
 
-    var xRange = d3.extent(data, function(d) { return +d.Timepoint; });
+    //var xRange = d3.extent(data, function(d) { return +d.Timepoint; });
     //keep axis the same when re-drawing plot, prevent setting axis beyond range of data
     //x.domain([Math.max(+lowTime, xRange[0]), Math.min(+highTime, xRange[1])]);
   	x.domain(d3.extent(data, function(d) { return d.date; }));
