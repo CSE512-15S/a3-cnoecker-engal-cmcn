@@ -99,10 +99,9 @@ var color = {
   Order: d3.scale.category20(),
   Family: d3.scale.category20(),
   Genus: d3.scale.category20(),
-  Species: d3.scale.category10(),
+  Species: d3.scale.category20(),
 };
 
-console.log(color['Kingdom'].domain().length===0);
 
 var x = d3.time.scale()
     .range([0, width]);
@@ -120,7 +119,11 @@ var yAxis = d3.svg.axis()
     .orient("left")
     .tickFormat(d3.format(".0%"));
 
+<<<<<<< HEAD:test_area.html
 var bisectTimepoint = d3.bisector(function(d) { return d.date; }).left;
+=======
+var bisectTimepoint = d3.bisector(function(d) { return d.Timepoint; }).right;
+>>>>>>> origin/master:index.html
 
 var area = d3.svg.area()
     .x(function(d) { return x(d.Timepoint); })
@@ -204,7 +207,7 @@ var drawPlot = function() {
           tooltip.html(current_data.name + "<br/>"  + current_data.values[closest].Timepoint.toDateString() + "<br/> Relative abundance: " + Math.round(1000*current_data.values[closest].y)/10+"%");
           return tooltip.style("visibility", "visible").style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px"); })
         .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
-
+//.on("click")
 
     browser.append("path")
         .attr("class", "area")
