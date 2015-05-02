@@ -1,1 +1,214 @@
-Hello
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+body {
+  font: 10px sans-serif;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+.browser text {
+  text-anchor: end;
+}
+</style>
+<body>
+
+
+<h1> Change in gut community composition over time</h1>
+
+<nav>
+<h2 id="demo">Phylum</h2>
+
+<!-- Added kingdom as an option since there is one Archaea, but leaving phylum as the default - Alex -->
+<select id="phylLevelSelect" onchange="changephylo()">
+  <option value="Kingdom">Kingdom</option>
+	<option value="Phylum" selected="selected">Phylum</option>
+	<option value="Class">Class</option>
+	<option value="Order">Order</option>
+	<option value="Family">Family</option>
+	<option value="Genus">Genus</option>
+	<option value="Species">Species</option>
+</select>
+
+
+<select id="subjectSelect" onchange="changeData()">
+  <option value="DonorA" selected="selected">Donor A</option>
+  <option value="DonorB">Donor B</option>
+</select>
+
+<br/>
+
+<input id="lowT" type="text" onchange="updateTime()" value="0"/>
+<input id="highT" type="text" onchange="updateTime()" value="350"/>
+
+<br/>
+
+<h2 id="timeUpd">Update Time Scale</h2>
+</nav>
+
+
+
+<script src="http://d3js.org/d3.v3.js"></script>
+
+<script>
+// can switch this variable to be numeric if it would be easier
+var phyloLevel = "Phylum";
+var lowTime = 0;
+var highTime = 350;
+function changephylo() {
+	phyloLevel = document.getElementById("phylLevelSelect").value;
+	document.getElementById("demo").innerHTML = phyloLevel;
+  // Added redrawing when taxonomic level is switched
+  svg.selectAll(".browser").remove();
+  svg.selectAll(".axis").remove();
+  drawPlot();
+}
+var dataID = "DonorA";
+function changeData() {
+  subject = document.getElementById("subjectSelect").value;
+  dataID = subject;
+  console.log(dataID);
+  svg.selectAll(".browser").remove();
+  svg.selectAll(".axis").remove();
+  drawPlot();
+}
+var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 1100 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
+var color = {
+  Kingdom: d3.scale.category10(),
+  Phylum: d3.scale.category20(),
+  Class: d3.scale.category20(),
+  Order: d3.scale.category20(),
+  Family: d3.scale.category20(),
+  Genus: d3.scale.category20(),
+  Species: d3.scale.category10(),
+};
+console.log(color['Kingdom'].domain().length===0);
+var x = d3.scale.linear()
+    .range([0, width]);
+var y = d3.scale.linear()
+    .range([height, 0]);
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .tickFormat(d3.format(".0%"));
+var bisectTimepoint = d3.bisector(function(d) { return d.Timepoint; }).left;
+var area = d3.svg.area()
+    .x(function(d) { return x(d.Timepoint); })
+    .y0(function(d) { return y(d.y0); })
+    .y1(function(d) { return y(d.y0 + d.y); });
+var stack = d3.layout.stack()
+    .values(function(d) { return d.values; });
+var tooltip = d3.select("body")
+    .append("div")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden")
+    .style("font-size", "medium")
+    .style("padding","10px")
+    .style("background-color","lightgrey")
+    .text("a simple tooltip");
+var browsers;
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+svg.append("clipPath")
+	.attr("id", "area-area")
+	.append("rect")
+	.attr("x",0)
+	.attr("y",0)
+	.attr("width",width)
+	.attr("height",height);
+var drawPlot = function() {
+  // Changed file name to match the separate files properly
+  d3.tsv(dataID.concat("_").concat(phyloLevel).concat(".txt"), function(error, data) {
+    if(color[phyloLevel].domain().length===0){
+      color[phyloLevel].domain(d3.keys(data[0]).filter(function(key) { 
+        return key !== "Timepoint"; }));
+    }
+    //  data.forEach(function(d) {
+    //    d.date = parseDate(d.date);
+    //  });
+    var browsers = stack(color[phyloLevel].domain().map(function(name) {
+      return {
+        name: name,
+        values: data.map(function(d) {
+          return {Timepoint: +d.Timepoint, y: d[name]*1};
+        })
+      };
+    }));
+    var xRange = d3.extent(data, function(d) { return +d.Timepoint; });
+    //keep axis the same when re-drawing plot, prevent setting axis beyond range of data
+    x.domain([Math.max(+lowTime, xRange[0]), Math.min(+highTime, xRange[1])]);
+  	y.domain([0,1]);
+    var browser = svg.selectAll(".browser")
+        .data(browsers)
+        .enter().append("g")
+        .attr("class", "browser")
+		    .attr("clip-path","url(#area-area)")
+        .on("mouseover", function(){
+          return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+        .on("mousemove", function(d){
+          var current_data = d3.select(this).datum(),
+          x_pos = x.invert(d3.mouse(this)[0]),
+          closest = bisectTimepoint(data, x_pos);
+          tooltip.html(current_data.name + "<br/>"  + "Day " + current_data.values[closest].Timepoint + "<br/> Relative abundance: " + Math.round(1000*current_data.values[closest].y)/10+"%");
+          return tooltip.style("visibility", "visible").style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px"); })
+        .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+    browser.append("path")
+        .attr("class", "area")
+        .attr("d", function(d) {
+          return area(d.values); })
+        .style("fill", function(d) {
+          return color[phyloLevel](d.name); });
+/*   browser.append("text")
+        .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; }) //second to last value
+        .attr("transform", function(d) { return "translate(" + x(d.value.Timepoint) + "," + y(d.value.y0 + d.value.y / 2) + ")"; })
+        .attr("x", -6)
+        .attr("dy", ".35em")
+        .text(function(d) { return d.name; });
+*/
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+  });
+}
+d3.select("timeUpd")
+	.on("click", updateTime());
+	
+function updateTime() {
+	lowTime = document.getElementById("lowT").value;
+	highTime = document.getElementById("highT").value;
+	
+	x.domain([lowTime, highTime]);
+	
+	svg.select(".x.axis")
+		.transition()
+		.duration(1000)
+		.call(xAxis);
+		
+	svg.selectAll(".browser").selectAll("path")
+		.transition()
+		.duration(1000)
+		.attr("d", function(d) {
+          return area(d.values); });
+	
+}	
+drawPlot();
+</script>
+
+</body>
+
