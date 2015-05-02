@@ -160,7 +160,7 @@ svg.append("clipPath")
 var drawPlot = function() {
 
   // Changed file name to match the separate files properly
-  d3.tsv(dataID.concat("_all_").concat(phyloLevel).concat(".txt"), function(error, data) {
+  d3.tsv(dataID.concat("_").concat(phyloLevel).concat(".txt"), function(error, data) {
     if(color[phyloLevel].domain().length===0){
       color[phyloLevel].domain(d3.keys(data[0]).filter(function(key) { 
         return key !== "Timepoint"; }));
