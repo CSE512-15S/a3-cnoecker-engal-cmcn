@@ -43,6 +43,11 @@ good_taxa = all_maxes[overallMax >= 1/display_height, Taxa]
 donorA = donorA[,c("Timepoint", good_taxa), with=F]
 donorB = donorB[,c("Timepoint", good_taxa), with=F]
 
+##make everything sum back up to 1
+
+donorA = data.table(Timepoint = donorA[,Timepoint], donorA[,good_taxa, with=F]/rowSums(donorA[,good_taxa,with=F]))
+donorB = data.table(Timepoint = donorB[,Timepoint], donorB[,good_taxa, with=F]/rowSums(donorB[,good_taxa,with=F]))
+
 write.table(donorA, file = paste0("DonorA_",tax_level,".txt"), sep = "\t", quote=F, row.names=F)
 write.table(donorB, file = paste0("DonorB_",tax_level,".txt"), sep = "\t", quote=F, row.names=F)
 
