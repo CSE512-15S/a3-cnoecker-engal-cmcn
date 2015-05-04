@@ -38,7 +38,7 @@ allnames = allnames[allnames != "Timepoint"]
 all_maxes = data.table(Taxa = allnames, Amaxes = apply(donorA[,allnames,with=F], 2, max),
                        Bmaxes = apply(donorB[,allnames,with=F], 2, max))
 all_maxes[,overallMax:= ifelse(Amaxes > Bmaxes, Amaxes, Bmaxes)]
-good_taxa = all_maxes[overallMax >= 1/display_height, Taxa]
+good_taxa = all_maxes[overallMax >= 3/display_height, Taxa]
 
 donorA = donorA[,c("Timepoint", good_taxa), with=F]
 donorB = donorB[,c("Timepoint", good_taxa), with=F]
