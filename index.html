@@ -42,7 +42,7 @@ body {
 	<option value="Species">Species</option>
 </select>
 
-
+ <button type="button" id="resetButton" onclick="resetData()">Reset</button> 
 
 <br/>
 </nav>
@@ -98,6 +98,13 @@ function changephylo() {
   drawPlot();
 }
 
+function resetData(){
+  phyloLevel = "Phylum";
+  document.getElementById("phylLevelSelect").value = phyloLevel;
+  svg.selectAll(".browser").remove();
+  svg.selectAll(".axis").remove();
+  drawPlot();
+}
 
 var x = d3.time.scale()
     .range([0, width]);
@@ -370,14 +377,12 @@ console.log(getDataDonorA());
       d.date = new Date(2011, 0, +d.Timepoint);
     })
 
-
-    //i'm not sure why this doesn't do anything at the moment
+    newcolor = color[phyloLevel]
     if(filterGroup instanceof Array ){
-      color[phyloLevel].domain().filter(function(key){
-        filterGroup.indexOf(key) !== -1;
-      })
+      newcolor.domain(color[phyloLevel].domain().filter(function(key){
+        return filterGroup.indexOf(key) !== -1;
+      }))
     }
-
 
       var browsers = stack(color[phyloLevel].domain().map(function(name) {
         return {
@@ -417,12 +422,15 @@ console.log(getDataDonorA());
             return tooltip.style("visibility", "visible").style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px"); })
           .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
           .on("click", function(){
-              var current_data = d3.select(this).datum();
-              var children = getAllChildren(current_data.name);
-              console.log(children);
-              phyloLevel = nextPhyloLevel[phyloLevel]
-              document.getElementById("phylLevelSelect").value = phyloLevel;
-              drawPlot(children);
+              if(phyloLevel !== "Species"){
+                var current_data = d3.select(this).datum();
+                var children = getAllChildren(current_data.name);
+                console.log(children);
+                phyloLevel = nextPhyloLevel[phyloLevel]
+                document.getElementById("phylLevelSelect").value = phyloLevel;
+                svg.selectAll(".browser").remove();
+                drawPlot(children);
+              }
           });
 
       browser.append("path")
