@@ -79,6 +79,18 @@ var color = {
   Species: d3.scale.category20(),
 };
 
+function resetColors(){
+  color = {
+  Kingdom: d3.scale.category10(),
+  Phylum: d3.scale.category20(),
+  Class: d3.scale.category20(),
+  Order: d3.scale.category20(),
+  Family: d3.scale.category20(),
+  Genus: d3.scale.category20(),
+  Species: d3.scale.category20(),
+  };
+}
+
   function changeData() {
   subject = document.getElementById("subjectSelect").value;
   dataID = subject;
@@ -103,6 +115,7 @@ function resetData(){
   document.getElementById("phylLevelSelect").value = phyloLevel;
   svg.selectAll(".browser").remove();
   svg.selectAll(".axis").remove();
+  resetColors();
   drawPlot();
 }
 
@@ -377,11 +390,11 @@ console.log(getDataDonorA());
       d.date = new Date(2011, 0, +d.Timepoint);
     })
 
-    newcolor = color[phyloLevel]
+    newcolor = color[phyloLevel];
     if(filterGroup instanceof Array ){
-      newcolor.domain(color[phyloLevel].domain().filter(function(key){
+      newcolor.domain(newcolor.domain().filter(function(key){
         return filterGroup.indexOf(key) !== -1;
-      }))
+      }));
     }
 
       var browsers = stack(color[phyloLevel].domain().map(function(name) {
