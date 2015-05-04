@@ -6,18 +6,12 @@
 
 ## Exploring gut microbial community composition over time
 
-Our visualization explores a dataset of the taxonomic composition of the gut microbiomes of 2 subjects over one year (David et al Genome Biology 2014). We chose to use an interactive stacked area chart, in which you can reorder or isolate taxonomic groups to compare their trends over time.
- potentially with an option to choose different taxonomic levels and zoom in on different stretches of time
-This is an effective visualization strategy for this type of data because the stacked area plot is very intuitive for time series compositional (relative abundance) data. Switching between taxonomic levels is useful because both broad overview trends and specific interactions between species might be interesting, and zooming in and out is useful because both fine scale dynamics and large scale variation might be interesting.
+Our visualization explores a dataset of the taxonomic composition of the gut microbiomes of 2 subjects over one year [(David et al Genome Biology 2014)](http://genomebiology.com/2014/15/7/R89). We chose to use an interactive stacked area chart, in which you can switch between taxonomic levels, isolate taxonomic groups to compare their trends over time, and vary the time scale resolution to view short- and long-term variation.
+The stacked area plot is an effective and intuitive visualization strategy for time series compositional (relative abundance) data. Switching between taxonomic levels is useful because both broad overview phylogenetic trends and specific interactions between species could be of interest. Zooming in and out is useful because both fine-scale dynamics and large-scale variation might be interesting.
 
 ## Running Instructions
 
-Please find our visualization at http://cse512-15s.github.io/a3-cnoecker-engal-cmcn/ .
-
-
-Access our visualization at http://cse512-15s.github.io/a3-jheer-domoritz-jasnyder/ or download this repository and run `python -m SimpleHTTPServer 9000` and access this from http://localhost:9000/.
-
-If you put your work online, please also write a [one-line description and add a link to your final work](http://note.io/1n3u46s) so people can access it directly from the CSE512-15S page.
+Please find our visualization at http://cse512-15s.github.io/a3-cnoecker-engal-cmcn/ . Alternatively, download this repository and run `python -m SimpleHTTPServer 9000` and access this from http://localhost:9000/.
 
 ## Story Board
 
@@ -25,8 +19,6 @@ If you put your work online, please also write a [one-line description and add a
 ![story2](storyboard2.png)
 ![story3](storyboard3.png)
 ![story4](storyboard4.png)
-
-Put either your storyboard content or a [link to your storyboard pdf file](storyboard.pdf?raw=true) here. Just like A2, you can use any software to create a *reasonable* pdf storyboard.
 
 
 ### Changes between Storyboard and the Final Implementation
