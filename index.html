@@ -352,30 +352,6 @@ d3.tsv("Subclade_map.txt", function(error2, submap) {
 
 var nextPhyloLevel = { Kingdom: "Phylum", Phylum: "Class", Class: "Order", Order: "Family", Family: "Genus", Genus: "Species", Species: "Species"};
 
-/*var getDataDonorA;
-var getDataDonorB;
-//var alldataDonorB = {};
-var taxLevel;
-var phyloLevels = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
-
-for(i = 0; i < phyloLevels.length; i++){
-  taxLevel = phyloLevels[i];
-  d3.tsv("DonorA_".concat(taxLevel).concat(".txt"), function(error, data){
-    data.forEach(function(d) {
-      d.date = new Date(2011, 0, +d.Timepoint);
-    })
-    getDataDonorA = function(){
-      return data[0];
-    }
-  })
-  d3.tsv("DonorB_".concat(taxLevel).concat(".txt"), function(error, data){
-    data.forEach(function(d) {
-      d.date = new Date(2011, 0, +d.Timepoint);
-    })
-  })
-};
-console.log(getDataDonorA());
-*/
 
   var drawPlot = function(filterGroup) {
 
@@ -384,20 +360,33 @@ console.log(getDataDonorA());
         color[phyloLevel].domain(d3.keys(data[0]).filter(function(key) { 
           return key !== "Timepoint"; }));
       } 
-
+      console.log(color[phyloLevel].domain());
+      console.log(color[phyloLevel].range());
 
     data.forEach(function(d) {
       d.date = new Date(2011, 0, +d.Timepoint);
     })
 
-    newcolor = color[phyloLevel];
-    if(filterGroup instanceof Array ){
-      newcolor.domain(newcolor.domain().filter(function(key){
-        return filterGroup.indexOf(key) !== -1;
-      }));
-    }
 
-      var browsers = stack(color[phyloLevel].domain().map(function(name) {
+    var newcolor = color[phyloLevel]
+    var allGroups; 
+    if(filterGroup instanceof Array ){
+      allGroups = filterGroup; 
+    //console.log(color[phyloLevel](filterGroup[0]));
+      // newcolors = [];
+      // newcolor = d3.scale.ordinal()
+      //   .domain(d3.keys(data[0]).filter(function(key){
+      //      return filterGroup.indexOf(key) !== -1; //only save values in filterGroup
+      //   }));
+      // for(j in newcolor.domain()){
+      //   newcolors.push(color[phyloLevel](j));
+      // }
+      // newcolor.range(newcolors);
+    }else {
+      allGroups = newcolor.domain();
+      //newcolor = color[phyloLevel];
+    }
+      var browsers = stack(allGroups.map(function(name) {
         return {
           name: name,
           values: data.map(function(d) {
@@ -410,48 +399,51 @@ console.log(getDataDonorA());
       //keep axis the same when re-drawing plot, prevent setting axis beyond range of data
     
     xTl.domain(d3.extent(data, function(d) { return d.date; }));
-      x.domain([xTl.invert(timepos.mid-timepos.fat), xTl.invert(timepos.mid + timepos.fat)]);
+    x.domain([xTl.invert(timepos.mid-timepos.fat), xTl.invert(timepos.mid + timepos.fat)]);
     
-    y.domain([0,1]);
+    y.domain([0,1])
 
-      var browser = paths.selectAll(".browser")
-          .data(browsers)
-          .enter().append("g")
-          .attr("class", "browser")
-          .attr("clip-path","url(#area-area)")
-          .on("mouseover", function(){
-            return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-          .on("mousemove", function(d){
-            var current_data = d3.select(this).datum(),
-            x_pos = x.invert(d3.mouse(this)[0]),
-            closest = bisectTimepoint(data, x_pos);
-            if(closest.name != "Bacteria"){
-              var parents = getAllParents(current_data.name);
-            } else{
-              var parents = ''
-            }
-            //console.log(getAllChildren(current_data.name));
-            tooltip.html( current_data.values[closest].Timepoint.toDateString() + "<br/><br/>" + parents + current_data.name + "<br/><br/> Relative abundance: " + Math.round(1000*current_data.values[closest].y)/10+"%");
-            return tooltip.style("visibility", "visible").style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px"); })
-          .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
-          .on("click", function(){
-              if(phyloLevel !== "Species"){
-                var current_data = d3.select(this).datum();
-                var children = getAllChildren(current_data.name);
-                console.log(children);
-                phyloLevel = nextPhyloLevel[phyloLevel]
-                document.getElementById("phylLevelSelect").value = phyloLevel;
-                svg.selectAll(".browser").remove();
-                drawPlot(children);
-              }
-          });
+    var parents, children, current_data;
+
+    var browser = paths.selectAll(".browser")
+      .data(browsers)
+      .enter().append("g")
+      .attr("class", "browser")
+      .attr("clip-path","url(#area-area)")
+      .on("mouseover", function(){
+        current_data = d3.select(this).datum();
+        x_pos = x.invert(d3.mouse(this)[0]),
+        closest = bisectTimepoint(data, x_pos);
+        parents = getAllParents(current_data.name);
+        tooltip.html( current_data.values[closest].Timepoint.toDateString() + "<br/><br/>" + parents + current_data.name + "<br/><br/> Relative abundance: " + Math.round(1000*current_data.values[closest].y)/10+"%");
+        return tooltip.style("visibility", "visible").style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
+        }) 
+            //return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+      .on("mousemove", function(d){
+        var current_data = d3.select(this).datum(),
+        x_pos = x.invert(d3.mouse(this)[0]),
+        closest = bisectTimepoint(data, x_pos);
+        parents = getAllParents(current_data.name);
+        tooltip.html( current_data.values[closest].Timepoint.toDateString() + "<br/><br/>" + parents + current_data.name + "<br/><br/> Relative abundance: " + Math.round(1000*current_data.values[closest].y)/10+"%");
+        return tooltip.style("visibility", "visible").style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px"); })
+      .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
+      .on("click", function(){
+        if(phyloLevel !== "Species"){
+          current_data = d3.select(this).datum();
+          children = getAllChildren(current_data.name);
+          phyloLevel = nextPhyloLevel[phyloLevel]
+          document.getElementById("phylLevelSelect").value = phyloLevel;
+          svg.selectAll(".browser").remove();
+          drawPlot(children);
+          }
+        });
 
       browser.append("path")
           .attr("class", "area")
           .attr("d", function(d) {
             return area(d.values); })
           .style("fill", function(d) {
-            return color[phyloLevel](d.name); });
+            return newcolor(d.name); });
 
       svg.append("g")
           .attr("class", "x axis")
