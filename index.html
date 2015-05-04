@@ -20,8 +20,18 @@ body {
 </style>
 <body>
 
-
+<div id="topinfo">
 <h1> A year in the life of the gut microbiota</h1>
+
+<p style="font-size:150%">The human gut microbiome is a complex community of bacteria that inhabit our lower intestines and perform many functions important to human health. 
+Research has focused on understanding what bacteria live in our guts, what they are doing and what it's affect is on the host health.
+To help understand how our gut microbiomes change over time, two researchers took samples of their own microbiome approximately once a day during 2011, <a href="http://genomebiology.com/2014/15/7/R89">published here</a>.
+They sequenced the samples and identified which bacterial species were living in their gut at each point. 
+In this visualization you can explore the structure of their gut communities, viewed at different phylogenetic levels.
+</p>
+
+
+</div>
 
 <nav>
 <!-- <h2 id="demo">Phylum</h2> -->
@@ -209,7 +219,7 @@ var timesvg = d3.select("#timeline").append("svg")
 timesvg.append("rect")
 	.attr("width", width)
 	.attr("height", height / 8)
-	.attr("style", "fill:blue;opacity:0.2");
+	.attr("style", "fill:darkblue;opacity:0.4");
 	
 var timebox = timesvg.append("rect")
 	.attr("width", (timepos.fat - arrowW)*2)
@@ -412,6 +422,7 @@ console.log(getDataDonorA());
     xTl.domain(d3.extent(data, function(d) { return d.date; }));
       x.domain([xTl.invert(timepos.mid-timepos.fat), xTl.invert(timepos.mid + timepos.fat)]);
     
+
     y.domain([0,1]);
 
       var browser = paths.selectAll(".browser")
@@ -442,9 +453,11 @@ console.log(getDataDonorA());
                 phyloLevel = nextPhyloLevel[phyloLevel]
                 document.getElementById("phylLevelSelect").value = phyloLevel;
                 svg.selectAll(".browser").remove();
+				svg.selectAll(".axis").remove();
                 drawPlot(children);
               }
           });
+
 
       browser.append("path")
           .attr("class", "area")
