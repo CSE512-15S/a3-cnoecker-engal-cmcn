@@ -23,13 +23,15 @@ Please find our visualization at http://cse512-15s.github.io/a3-cnoecker-engal-c
 
 ### Changes between Storyboard and the Final Implementation
 
-A paragraph explaining changes between the storyboard and the final implementation.
-
+We largely followed our planned storyboard. We added the feature of clicking on a subset of data to see it at a finer taxonomic scale. We originally intended to have a cohesive color scheme through the entire plot (e.g. everything within the Firmicutes phylum colored a shade of red, everything within Bacteroides a shade of blue, etc), but ran into some difficulties implementing such a complex color scale in a way that worked with all the other features. This would be doable and desirable with a bit more time. 
 
 ## Development Process
 
-Include:
-- Breakdown of how the work was split among the group members. 
-- A commentary on the development process, including answers to the following questions: 
-  - Roughly how much time did you spend developing your application?
-  - What aspects took the most time?
+Breakdown of how the work was split among the group members:
+- Alex formatted and organized the data, generated mapping files between the different taxonomic levels, set up the GitHub account. 
+- Cecilia made the initial area plot, wrote the switching between the two donors, wrote the mouseover tooltip, and wrote the clicking to subset data.
+- Colin drew the storyboard, set up the switching between taxonomic levels, and created the zoom slider and time scaling.  
+
+Time spent: 8-10 hours a person
+
+The most time-consuming aspects were simply learning to use d3 and solving bugs related to the relatively unique structure of the taxonomic data - making sure the ordering was consistent across taxonomic levels and plot drawings and so on.
