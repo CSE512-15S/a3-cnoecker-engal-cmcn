@@ -431,7 +431,15 @@ console.log(getDataDonorA());
           .attr("class", "browser")
           .attr("clip-path","url(#area-area)")
           .on("mouseover", function(){
-            return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+            var current_data = d3.select(this).datum(),
+            x_pos = x.invert(d3.mouse(this)[0]),
+            closest = bisectTimepoint(data, x_pos);
+            if(closest.name != "Bacteria"){
+              var parents = getAllParents(current_data.name);
+            } else{
+              var parents = ''
+            }
+            //return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
           .on("mousemove", function(d){
             var current_data = d3.select(this).datum(),
             x_pos = x.invert(d3.mouse(this)[0]),
