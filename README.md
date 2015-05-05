@@ -11,7 +11,7 @@ The stacked area plot is an effective and intuitive visualization strategy for t
 
 ## Running Instructions
 
-Please find our visualization at http://cse512-15s.github.io/a3-cnoecker-engal-cmcn/ . Alternatively, download this repository and run `python -m SimpleHTTPServer 9000` and access this from http://localhost:9000/.
+Please find our visualization at http://cse512-15s.github.io/a3-cnoecker-engal-cmcn/ . Alternatively, download this repository and run `python -m SimpleHTTPServer 9000` and access this from http://localhost:9000/. Clicking on a stripe in the plot subsets the data to show that group at one level finer taxonomic resolution.
 
 ## Story Board
 
